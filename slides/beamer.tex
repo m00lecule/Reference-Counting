@@ -70,6 +70,16 @@ each chunk the number of pointers that point to it}; when the number drops to
 zero the chunk can be declared garbage; in a literal sense, reference counting collects garbage, unlike the other garbage collection algorithms, which actually collect
 reachable chunks. In line with the name reference counting, we will call pointers
 references in this section.
+\\~\\
+Also, they may still need a \textbf{one-shot} garbage collector as backup for situations in which they cannot cope with the demand.
+\end{frame}
+
+
+\begin{frame}
+  \frametitle{On-the-fly} 
+  \justifying
+Reference counting is \textbf{On-the-fly} type of garbage collector (also called incremental): some actions are performed at each call of \textbf{Malloc} and/or \textbf{Free}. These actions make some local modifications to the chunk structure to increase the probability of finding a free chunk
+when needed.
 \end{frame}
 
 \begin{frame}
@@ -104,13 +114,13 @@ reference manipulations
 \begin{frame}
   \frametitle{keeping track of all
 reference manipulations}
-  \justifying
-  The compiler inserts special code for all reference manipulations: incrementing
+  \justifying  
+  The compiler \textbf{inserts special code for all reference manipulations} and at each call of Malloc and/or Free - incrementing
 the reference count when a reference to a chunk is duplicated and decrementing it
 when such a reference is deleted. 
-
+	\\~\\
 	Besides assignment statements,
-the compiler also has to add reference increasing code to parameter transfers, since
+the compiler also has to add reference increasing code to \textbf{parameter transfers}, since
 a reference that is passed as a parameter is effectively assigned to a local variable of
 the called routine. Note that not all references in the running program are references to chunks on
 the heap; many of them point to blocks in the program data area, and all referencecounting code must make sure it does not follow such references.
@@ -118,9 +128,9 @@ the heap; many of them point to blocks in the program data area, and all referen
 
 
 \begin{frame}
-  \frametitle{keeping track pseudocode}
+  \frametitle{p := q additional reference manipulations pseudocode}
   \justifying
-  \begin{block}{title}
+  \begin{block}{}
   \textbf{if} Points into the heap (q):\\ \hspace*{20pt} Increment q.referenceCount;\\ \textbf{if} Points into the heap (p):\\ \hspace*{20pt} Decrement p.referenceCount;\\ \hspace*{20pt} \textbf{if} p.referenceCount = 0:\\ \hspace*{40pt} FreeRecursively (p);
   \end{block}
 \end{frame}  
@@ -128,7 +138,7 @@ the heap; many of them point to blocks in the program data area, and all referen
 \begin{frame}
   \frametitle{recursively freeing chunks pseudocode}
   \justifying  
-  \begin{block}{title1}
+  \begin{block}{}
   \textbf{procedure} FreeRecursively(Pointer); \\
 \hspace*{20pt} \textbf{if} not IsPointerIntoHeap (Pointer): \textbf{return};\\
 \hspace*{20pt} \textbf{if} Pointer.referenceCount != 0: \textbf{return};\\
@@ -144,7 +154,10 @@ the heap; many of them point to blocks in the program data area, and all referen
   \frametitle{Recursively freeing cons} 
   \justifying
       \begin{alertblock}{Cons}
-        Recursion is, however, an unwelcome feature in a garbage collector since it requires an \textbf{unpredictable amount of stack space}. Having a garbage collector fail for lack of memory is kind of embarrassing, though, and several techniques
+        Recursion is, however, an unwelcome feature in a garbage collector since it requires an \textbf{unpredictable amount of stack space}. 
+\\~\\        
+\justifying
+        Having a garbage collector fail for lack of memory is kind of embarrassing, though, and several techniques
 have been invented to avoid the problem. The best solution is using \textbf{pointer reversal}.
     \end{alertblock}
 \end{frame}
@@ -178,16 +191,18 @@ have been invented to avoid the problem. The best solution is using \textbf{poin
   \frametitle{Efficiency} 
   \justifying
 The compiled code has
-to monitor all reference manipulations, and each and every reference manipulation
-requires the adjustment of the associated reference counts. This is a considerable
-overhead in comparison to other garbage collection techniques that do not monitor
+to monitor \textbf{all reference manipulations} and each and every reference manipulation
+requires the adjustment of the associated reference counts. 
+\\~\\
+This is a considerable
+\textbf{overhead} in comparison to other garbage collection techniques that do not monitor
 any pointer action and reclaim garbage chunks only when needed.
 \end{frame}
 
 \begin{frame}
   \frametitle{Memory fragmentation} 
   \justifying
-The free list is augmented with the reclaimed chunks, but it remains fragmented. In principle
+The free list is augmented with the reclaimed chunks, but it remains \textbf{fragmented}. In principle
 doing a compaction phase during a reference counting allocation request is possible,
 but few reference counting garbage collectors go to such lengths.
 
@@ -214,7 +229,6 @@ but few reference counting garbage collectors go to such lengths.
                 
                 
             \end{tikzpicture}
-        \caption{Compaction example}
         \label{fig:compaction_example}
     \end{figure}
 
@@ -225,10 +239,12 @@ but few reference counting garbage collectors go to such lengths.
   \frametitle{Cycles} 
   \justifying
 The problem with reference counting is that it takes its decisions by considering
-only one node in the graph at a time, and in order to reclaim a cyclic data structure all
-nodes in the data structure should be considered as garbage together. Once reference
-counting has failed to reclaim a cyclic data structure, the chunks involved will never
-be reclaimed. This has the unfortunate effect that free space leaks away, which might
+\textbf{only one node} in the graph at a time and \textsl{in order to reclaim a cyclic data structure all
+nodes in the data structure should be considered as garbage together}. 
+\\~\\
+\justifying
+Once reference counting has failed to reclaim a cyclic data structure, the chunks involved \textbf{will never
+be reclaimed}. This has the unfortunate effect that free space leaks away, which might
 even cause the program to run out of free space when other garbage collectors would
 be able to reclaim the cyclic structures and allow the program to continue.
 \end{frame}
@@ -481,6 +497,7 @@ be able to reclaim the cyclic structures and allow the program to continue.
     \justifying
     The pointers from the root set may point to chunks in the heap (controlled by the garbage collector) what makes this chunks reachable. Those reachable chunks can obviously contain pointers to other areas in the heap which are then reachable as well.
     \\~\\
+    \justifying
     That's why we can divide the problem of finding all reachable chucks (thus problem of the garbage collection) into three subproblems:
     
     \begin{enumerate}
