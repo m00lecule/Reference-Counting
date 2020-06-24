@@ -197,37 +197,36 @@
 \begin{frame}
   \frametitle{On-the-fly} 
   \justifying
-Reference counting is \textbf{On-the-fly} type of garbage collector (also called incremental): some actions are performed at each call of \textbf{Malloc} and/or \textbf{Free}. These actions make some local modifications to the chunk structure to increase the probability of finding a free chunk
+Reference counting is \textbf{on-the-fly} type of garbage collector (also called incremental): some actions are performed at each call of \texttt{malloc} and/or \texttt{free}. These actions make some local modifications to the chunk structure to increase the probability of finding a free chunk
 when needed.
 \end{frame}
 
 
 \begin{frame}
-  \frametitle{Rules}
+  \frametitle{Main implementation challenges}
   \justifying
-    \begin{block}{Implementation challenges}
+    % \begin{block}{Implementation challenges}
         \begin{enumerate}
             \item keeping track of all
 reference manipulations
             \item  recursively freeing chunks with zero reference count
         \end{enumerate}
-  	\end{block}
+    % \end{block}
 \end{frame}
 
 \begin{frame}
-  \frametitle{keeping track of all
-reference manipulations}
-  \justifying  
-  The compiler \textbf{inserts special code for all reference manipulations} and at each call of Malloc and/or Free - incrementing
-the reference count when a reference to a chunk is duplicated and decrementing it
-when such a reference is deleted. 
-	\\~\\
-	Besides assignment statements,
-the compiler also has to add reference increasing code to \textbf{parameter transfers}, since
-a reference that is passed as a parameter is effectively assigned to a local variable of
-the called routine. Note that not all references in the running program are references to chunks on
-the heap; many of them point to blocks in the program data area, and all referencecounting code must make sure it does not follow such references.
-\end{frame}
+    \frametitle{Reference manipulations}
+    \justifying
+    The compiler \textbf{inserts special code for all reference manipulations} and at each call of \texttt{malloc} and/or \texttt{free} - incrementing
+    the reference count when a reference to a chunk is duplicated and decrementing it
+    when such a reference is deleted. 
+      \\~\\
+    Besides assignment statements, the compiler also has to add reference increasing code to \textbf{parameter transfers}, since
+    a reference that is passed as a parameter is effectively assigned to a local variable of
+    the called routine. Note that not all references in the running program are references to chunks on
+    the heap; many of them point to blocks in the program data area, and all reference counting code must make sure it does not follow such references.
+
+  \end{frame}
 
 
 \begin{frame}
