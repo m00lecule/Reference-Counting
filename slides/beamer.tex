@@ -314,20 +314,20 @@ but few reference counting garbage collectors go to such lengths.
                 \draw[thick, <->] (0.3, 1.2) -- (9.7, 1.2) node [midway, above, fill=white]{fragmented memory};
                 
                 \draw[thick] (0,0) grid (10,1);
-                \filldraw[fill=red, draw=black] (0,0) rectangle (1,1);
-                \filldraw[fill=red, draw=black] (2,0) rectangle (3,1);
-                \filldraw[fill=red, draw=black] (3,0) rectangle (4,1);
-                \filldraw[fill=red, draw=black] (5,0) rectangle (6,1);
-                \filldraw[fill=red, draw=black] (8,0) rectangle (9,1);
+                \filldraw[fill=blue, draw=black] (0,0) rectangle (1,1);
+                \filldraw[fill=blue, draw=black] (2,0) rectangle (3,1);
+                \filldraw[fill=blue, draw=black] (3,0) rectangle (4,1);
+                \filldraw[fill=blue, draw=black] (5,0) rectangle (6,1);
+                \filldraw[fill=blue, draw=black] (8,0) rectangle (9,1);
                    
 				\draw[thick, <->] (0.3, -1.8) -- (9.7, -1.8) node [midway, above, fill=white] {consistent memory};
 				                   
                 \draw[thick] (0,-2) grid (10,-3);
-                \filldraw[fill=red, draw=black] (0,-2) rectangle (1,-3);
-                \filldraw[fill=red, draw=black] (1,-2) rectangle (2,-3);
-                \filldraw[fill=red, draw=black] (2,-2) rectangle (3,-3);
-                \filldraw[fill=red, draw=black] (3,-2) rectangle (4,-3);
-                \filldraw[fill=red, draw=black] (4,-2) rectangle (5,-3);
+                \filldraw[fill=blue, draw=black] (0,-2) rectangle (1,-3);
+                \filldraw[fill=blue, draw=black] (1,-2) rectangle (2,-3);
+                \filldraw[fill=blue, draw=black] (2,-2) rectangle (3,-3);
+                \filldraw[fill=blue, draw=black] (3,-2) rectangle (4,-3);
+                \filldraw[fill=blue, draw=black] (4,-2) rectangle (5,-3);
                 
                 
             \end{tikzpicture}
@@ -335,7 +335,6 @@ but few reference counting garbage collectors go to such lengths.
     \end{figure}
 
 \end{frame}
-
 
 \begin{frame}
   \frametitle{Cycles} 
@@ -349,6 +348,8 @@ Once reference counting has failed to reclaim a cyclic data structure, the chunk
 be reclaimed}. This has the unfortunate effect that free space leaks away, which might
 even cause the program to run out of free space when other garbage collectors would
 be able to reclaim the cyclic structures and allow the program to continue.
+\\~\\
+
 \end{frame}
 
 \begin{frame}
@@ -385,12 +386,11 @@ be able to reclaim the cyclic structures and allow the program to continue.
         chunk/.style={rectangle, draw=black!60, fill=black!5, very thick, minimum width=20pt, minimum height=20pt}
       ]
         \node[stack]  (stack)                                                                       {stack};
-        \node[count]  (count)  at(2.8, 1)   [node distance=80pt, text=red]                  {2};
+        \node[count]  (count)  at(2.8, 1)   [node distance=80pt]                            {1};
         \node[chunk]  (chunk)               [right of=count, node distance=20pt]            {};
         \node[count]  (count2) at(2.8, -1)  [below of=count, node distance=50pt]            {1};
         \node[chunk]  (chunk2)               [right of=count2, node distance=20pt]           {};
 
-        \draw[red, ->, thick, dotted]  ([yshift=-5pt]stack.east) -- ([yshift=-5pt]count.west);
         \draw[->, thick]  (chunk.south) -- (count2.north);
         \draw[->, thick]  (chunk2.north) -- (count.south);
 
@@ -399,6 +399,66 @@ be able to reclaim the cyclic structures and allow the program to continue.
       \end{tikzpicture}
     \end{column}
   \end{columns}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Weak references} 
+  \justifying
+  When using reference counting, cycles can be implemented using \textbf{weak references}. Creating, manupulating and deleting them does not cause changes of reference count.
+  \\~\\
+  However, chunk referenced by weak reference might no longer exist; programmer has to manually handle such situation.
+  \\~\\
+  \begin{columns}
+    \begin{column}{0.4\textwidth}
+      \begin{tikzpicture}[
+        stack/.style={rectangle, draw=black!60, fill=black!5, very thick, minimum size=5mm, minimum height=120pt},
+        count/.style={rectangle, draw=black!60, fill=black!5, very thick, minimum width=20pt, minimum height=20pt},
+        chunk/.style={rectangle, draw=black!60, fill=black!5, very thick, minimum width=20pt, minimum height=20pt}
+      ]
+        \node[stack]  (stack)                                                                       {stack};
+        \node[count]  (count)  at(2.8, 1)   [node distance=80pt, text=red]                  {1};
+        \node[chunk]  (chunk)               [right of=count, node distance=20pt]            {};
+        \node[count]  (count2) at(2.8, -1)  [below of=count, node distance=50pt]            {1};
+        \node[chunk]  (chunk2)               [right of=count2, node distance=20pt]           {};
+
+        \draw[->, thick, gray!50]  (chunk2.north) -- (count.south);
+        \draw[red, ->, thick, dotted]  ([yshift=-5pt]stack.east) -- ([yshift=-5pt]count.west);
+        \draw[->, thick]  (chunk.south) -- (count2.north);
+
+        \draw[black, dotted] (1.5, -2) rectangle (5, 2);
+        \node[] at (2, 2.3) {heap};
+      \end{tikzpicture}
+    \end{column}
+    \begin{column}{0.1\textwidth} 
+    \end{column}
+    \begin{column}{0.5\textwidth} 
+      \begin{tikzpicture}[
+        stack/.style={rectangle, draw=black!60, fill=black!5, very thick, minimum size=5mm, minimum height=120pt},
+        count/.style={rectangle, dotted, draw=red, fill=black!5, very thick, minimum width=20pt, minimum height=20pt},
+        chunk/.style={rectangle, dotted, draw=red, fill=black!5, very thick, minimum width=20pt, minimum height=20pt}
+      ]
+        \node[stack]  (stack)                                                                       {stack};
+        \node[count]  (count)  at(2.8, 1)   [node distance=80pt]                            {0};
+        \node[chunk]  (chunk)               [right of=count, node distance=20pt]            {};
+        \node[count, text=red]  (count2) at(2.8, -1)  [below of=count, node distance=50pt]            {0};
+        \node[chunk]  (chunk2)               [right of=count2, node distance=20pt]           {};
+
+        \draw[->, thick, dotted, red]  (chunk.south) -- (count2.north);
+        \draw[->, thick, dotted, gray!50]  (chunk2.north) -- (count.south);
+
+        \draw[black, dotted] (1.5, -2) rectangle (5, 2);
+        \node[] at (2, 2.3) {heap};
+      \end{tikzpicture}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Reference counting in parallel programming} 
+  \justifying
+  Reference counting is based on modyfing (incrementing or decrementing) a value every time reference is copied/dropped. If reference is shared between threads, more than one thread might try to copy/drop reference, causing \textbf{data race}.
+  \\~\\
+  This problem can be solved by making reference count an \textbf{atomic} variable. It solves problems with data races, hovewer - as atomic operations are expensive - it decerases performance. 
 \end{frame}
 
 \begin{frame}[fragile]
