@@ -208,7 +208,7 @@ when needed.
     % \begin{block}{Implementation challenges}
         \begin{enumerate}
             \item keeping track of all
-reference manipulations
+\textbf{reference manipulations}
             \item  recursively freeing chunks with zero reference count
         \end{enumerate}
     % \end{block}
@@ -349,6 +349,103 @@ Once reference counting has failed to reclaim a cyclic data structure, the chunk
 be reclaimed}. This has the unfortunate effect that free space leaks away, which might
 even cause the program to run out of free space when other garbage collectors would
 be able to reclaim the cyclic structures and allow the program to continue.
+\end{frame}
+
+\begin{frame}
+  \frametitle{Cycles}
+  \begin{columns}
+    \begin{column}{0.5\textwidth}
+      Despite deletion of last reference to chunk from stack, which causes that chunk is no longer available... 
+      \\~\\
+      \begin{tikzpicture}[
+        stack/.style={rectangle, draw=black!60, fill=black!5, very thick, minimum size=5mm, minimum height=150pt},
+        count/.style={rectangle, draw=black!60, fill=black!5, very thick, minimum width=20pt, minimum height=20pt},
+        chunk/.style={rectangle, draw=black!60, fill=black!5, very thick, minimum width=20pt, minimum height=20pt}
+      ]
+        \node[stack]  (stack)                                                                       {stack};
+        \node[count]  (count)  at(2.8, 1)   [node distance=80pt, text=red]                  {2};
+        \node[chunk]  (chunk)               [right of=count, node distance=20pt]            {};
+        \node[count]  (count2) at(2.8, -1)  [below of=count, node distance=50pt]            {1};
+        \node[chunk]  (chunk2)               [right of=count2, node distance=20pt]           {};
+
+        \draw[red, ->, thick, dotted]  ([yshift=-5pt]stack.east) -- ([yshift=-5pt]count.west);
+        \draw[->, thick]  (chunk.south) -- (count2.north);
+        \draw[->, thick]  (chunk2.north) -- (count.south);
+
+        \draw[black, dotted] (1.5, -2) rectangle (5, 2);
+        \node[] at (2, 2.3) {heap};
+      \end{tikzpicture}
+    \end{column}
+    \begin{column}{0.5\textwidth} 
+      data is not deleted, as it is still referred by another chunk, kept alive by existing reference from our chunk
+      \\~\\
+      \begin{tikzpicture}[
+        stack/.style={rectangle, draw=black!60, fill=black!5, very thick, minimum size=5mm, minimum height=150pt},
+        count/.style={rectangle, draw=black!60, fill=black!5, very thick, minimum width=20pt, minimum height=20pt},
+        chunk/.style={rectangle, draw=black!60, fill=black!5, very thick, minimum width=20pt, minimum height=20pt}
+      ]
+        \node[stack]  (stack)                                                                       {stack};
+        \node[count]  (count)  at(2.8, 1)   [node distance=80pt, text=red]                  {2};
+        \node[chunk]  (chunk)               [right of=count, node distance=20pt]            {};
+        \node[count]  (count2) at(2.8, -1)  [below of=count, node distance=50pt]            {1};
+        \node[chunk]  (chunk2)               [right of=count2, node distance=20pt]           {};
+
+        \draw[red, ->, thick, dotted]  ([yshift=-5pt]stack.east) -- ([yshift=-5pt]count.west);
+        \draw[->, thick]  (chunk.south) -- (count2.north);
+        \draw[->, thick]  (chunk2.north) -- (count.south);
+
+        \draw[black, dotted] (1.5, -2) rectangle (5, 2);
+        \node[] at (2, 2.3) {heap};
+      \end{tikzpicture}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Usage of reference counting - Objective-C, Swift} 
+  \justifying
+  Reference counting is used as method of garbage collection in languages related to Apple ecosystem - \textbf{Objective-C} and \textbf{Swift}.
+  \\~\\
+  In order to allow cyclic data structures, Objective-C and Swift allows creating weak references using \texttt{weak} keyowrd:
+  \\~\\
+  \begin{lstlisting}
+    class Person {
+      var apartment: Apartment
+    }
+
+    class Apartment {
+      weak var tenant: Person?
+    }\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Usage of reference counting - smart pointers} 
+  \justifying
+  Reference counting is also often used in \textbf{smart pointers}. Smart pointers are data structures that wraps raw pointers and manages data that it points to, providing garbage collection. They are \textbf{not a part of language itself} - they are usually part of standard library. 
+  \\~\\
+  For example, C++ standard library provides \texttt{shared\_ptr} and \texttt{weak\_ptr} template classes, which implements reference counting:
+  \\~\\
+  \begin{lstlisting}[
+    basicstyle=\tiny
+  ]
+    shared_ptr<Person> person1 = make_shared<Person>(Person()) // refcount = 1
+    shared_ptr<Person> person2 = person // refcount = 2
+    weak_ptr<Person> person_weak = weak_ptr<Person>(person1) // refcount = 2\end{lstlisting}
+  % \\~\\
+  C++ mechanisms such as copying constructors, operator overloading and RAII allows smart pointers to use natural C++ idioms without need of directly implementing GC in the compiler.
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Usage of reference counting - other} 
+  \justifying
+  \textbf{Rust} also provides smart pointers types in its standard library. As avoiding data races in compile-time is main goal of Rust, Rust standard library provides 3 types of smart pointers: 
+  \begin{itemize}
+    \item \texttt{Rc<T>} - does not use atomic variable for counting reference, cannot be sent to other threads (enforced in compile-time)
+    \item \texttt{Arc<T>} - uses atomic variable for counting reference, can be sent to other threads
+    \item \texttt{Weak<T>} - weak reference
+  \end{itemize}
+  \vspace{20pt}
+  Reference counting is also usually used in \textbf{UNIX} kernels for handling \textbf{file descriptiors recovery}.
 \end{frame}
 
 
