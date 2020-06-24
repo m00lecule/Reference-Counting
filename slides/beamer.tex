@@ -26,6 +26,14 @@
 \usepackage{tikz}
 \usetikzlibrary{shadows}
 \usetikzlibrary{positioning}
+\usepackage{soul}
+\makeatletter
+\let\HL\hl
+\renewcommand\hl{%
+  \let\set@color\beamerorig@set@color
+  \let\reset@color\beamerorig@reset@color
+  \HL}
+\makeatother
 
 % Add your custom definitions etc., if required
 % -----misc
@@ -66,9 +74,9 @@
 \begin{frame}
   \frametitle{Introduction} 
   \justifying
- \textbf{Reference counting} is an \textbf{garbage collection} algorithm. It is based on \textbf{recording the number of pointers that points to given chunk of memory}. When the number of pointers drops to zero, the chunk can be declared garbage. 
+ \textbf{Reference counting} is an \textbf{garbage collection} algorithm. It is based on \hl{recording the number of pointers that points to given chunk of memory}. When the number of pointers drops to zero, the chunk can be declared garbage. 
  \\~\\
-  In line with the name `reference counting`, in this presentation pointers will be called `references'.
+  In line with the name reference counting, in this presentation \textbf{pointers} will be called \textbf{references}.
   \\~\\
 \end{frame}
 
@@ -238,7 +246,7 @@ when needed.
 \end{frame}  
 
 \begin{frame}
-  \frametitle{recursively freeing chunks pseudocode}
+  \frametitle{Recursively freeing chunks pseudocode}
   \justifying  
   \begin{block}{}
   \textbf{procedure} FreeRecursively(Pointer); \\
@@ -256,24 +264,12 @@ when needed.
   \frametitle{Recursively freeing cons} 
   \justifying
       \begin{alertblock}{Cons}
-        Recursion is, however, an unwelcome feature in a garbage collector since it requires an \textbf{unpredictable amount of stack space}. 
+        Recursion is, however an unwelcome feature in a garbage collector since it requires an \textbf{unpredictable amount of stack space}. 
 \\~\\        
 \justifying
-        Having a garbage collector fail for lack of memory is kind of embarrassing, though, and several techniques
+        Having a garbage collector fail for lack of memory is kind of embarrassing, though and several techniques
 have been invented to avoid the problem. The best solution is using \textbf{pointer reversal}.
     \end{alertblock}
-\end{frame}
-
-\begin{frame}
-  \frametitle{Identification techniques} 
-  \justifying
-  figures that will illustrate this algorithm
-\end{frame}
-
-\begin{frame}
-  \frametitle{Identification techniques} 
-  \justifying
-  figures that will illustrate this algorithm
 \end{frame}
 
 \begin{frame}
@@ -311,7 +307,7 @@ but few reference counting garbage collectors go to such lengths.
     \begin{figure}
         \centering
             \begin{tikzpicture}
-                \draw[thick, <->] (0.3, 1.2) -- (9.7, 1.2) node [midway, above, fill=white]{fragmented memory};
+                \draw[thin, <->] (0.3, 1.2) -- (9.7, 1.2) node [midway, above, fill=white]{fragmented memory};
                 
                 \draw[thick] (0,0) grid (10,1);
                 \filldraw[fill=blue, draw=black] (0,0) rectangle (1,1);
@@ -320,7 +316,7 @@ but few reference counting garbage collectors go to such lengths.
                 \filldraw[fill=blue, draw=black] (5,0) rectangle (6,1);
                 \filldraw[fill=blue, draw=black] (8,0) rectangle (9,1);
                    
-				\draw[thick, <->] (0.3, -1.8) -- (9.7, -1.8) node [midway, above, fill=white] {consistent memory};
+				\draw[thin, <->] (0.3, -1.8) -- (9.7, -1.8) node [midway, above, fill=white] {consistent memory};
 				                   
                 \draw[thick] (0,-2) grid (10,-3);
                 \filldraw[fill=blue, draw=black] (0,-2) rectangle (1,-3);
@@ -340,7 +336,7 @@ but few reference counting garbage collectors go to such lengths.
   \frametitle{Cycles} 
   \justifying
 The problem with reference counting is that it takes its decisions by considering
-\textbf{only one node} in the graph at a time and \textsl{in order to reclaim a cyclic data structure all
+\textbf{only one node} in the graph at a time and \hl{in order to reclaim a cyclic data structure all
 nodes in the data structure should be considered as garbage together}. 
 \\~\\
 \justifying
@@ -406,7 +402,7 @@ be able to reclaim the cyclic structures and allow the program to continue.
   \justifying
   When using reference counting, cycles can be implemented using \textbf{weak references}. Creating, manupulating and deleting them does not cause changes of reference count.
   \\~\\
-  However, chunk referenced by weak reference might no longer exist; programmer has to manually handle such situation.
+  However, chunk referenced by weak reference \textbf{might no longer exist}, due to have being collected by GC; programmer has to manually handle such situation.
   \\~\\
   \begin{columns}
     \begin{column}{0.4\textwidth}
@@ -458,7 +454,7 @@ be able to reclaim the cyclic structures and allow the program to continue.
   \justifying
   Reference counting is based on modyfing (incrementing or decrementing) a value every time reference is copied/dropped. If reference is shared between threads, more than one thread might try to copy/drop reference, causing \textbf{data race}.
   \\~\\
-  This problem can be solved by making reference count an \textbf{atomic} variable. It solves problems with data races, hovewer - as atomic operations are expensive - it decerases performance. 
+  This problem can be solved by making reference count an \textbf{atomic} variable. It solves problems with data races, hovewer - as atomic operations are expensive - it \textbf{decreases performance}. 
 \end{frame}
 
 \begin{frame}[fragile]
